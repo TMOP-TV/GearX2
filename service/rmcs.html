@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงทะเบียนรับบัตรสมาชิก</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://gearx2.pages.dev/img/GearX2.png">
+    <link rel="stylesheet" href="/css/service.css">
+</head>
+<body>
+    <div class="side-menu">
+        <div class="side-menu-content">
+            <div class="mt-5 flex justify-content-center">
+                <img src="/img/GearX2.png" width="100px">
+            </div>
+            <div class="mt-10">
+                <ul>
+                    <li>
+                        <b><a href="/">หน้าหลัก</a></b>
+                    </li>
+                    <li>
+                        <b>บริการสมาชิกบุคคลทั่วไป</b>
+                        <ul>
+                            <li><a href="cmis.html">เปลี่ยนแปลงข้อมูลสมาชิก</a></li>
+                            <li><a href="rmcs.html">ลงทะเบียนรับบัตรสมาชิก</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="content-a">
+            <h3>ยินดีต้อนรับ</h3>
+            <div class="gap"></div>
+            <h4>เข้าสู่ระบบบริการสำหรับสมาชิก</h4>
+            <div class="gap"></div>
+            <div class="gap"></div>
+            <main>
+                <div class="login-container" id="loginBox">
+                    <h2>ลงทะเบียนรับบัตรสมาชิก</h2>
+                    <h2 style=" font-weight: 500; text-align: start; color:red; ">
+                            ระบบยังไม่สามารถใช้งานได้ในขณะนี้
+                            <br>ผู้รับผิดชอบงาน : 
+                            <br>
+                            <ul style=" list-style: circle; padding-left: 30px; ">
+                                <li>สำนักงานเทคโนโลยี และสารสนเทศ</li>
+                                <li>สำนักงานทะเบียน</li>
+                            </ul>
+                    </h2>
+                    
+                    <!--
+                    <form method="post" autocomplete="off" name="hello-sheet">
+                        <label for="username">รหัสนักเรียน:</label>
+                        <input type="text" id="username" name="username" required placeholder="กรอกรหัสนักเรียน">
+                        <button type="submit" style="margin-top: 15px;">ลงทะเบียนรับบัตรสมาชิก</button>
+                        <div id="errorMessage" style="display: block;color: red;margin-top: 10px;"></div>
+                    </form>
+                    -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyq5TX8t1LnmeJ6N4hc8Uqp7bqx80UutGVf9g8guF-LoJgNEmIuolHHfIMfu8HgQpRHaA/exec';
+            const form = document.forms['hello-sheet'];
+            const usernameInput = document.getElementById("username");
+            const errorContainer = document.getElementById("errorMessage");
+
+            // ฟังก์ชันแสดงข้อความผิดพลาด
+            function showError(message) {
+                errorContainer.innerHTML = message;
+                errorContainer.style.display = "block";
+            }
+
+            // ตรวจสอบข้อมูลเมื่อมีการกรอก
+            usernameInput.addEventListener("input", function () {
+                if (usernameInput.value === "45405") {
+                    showError("⛔ บัญชีนี้ถูกระงับการใช้งาน<br>หากมีข้อสงสัยให้สอบถามหัวหน้าสำนักงานสภา");
+                    return;
+                } else {
+                    showError(""); // เคลียร์ข้อความผิดพลาด
+                }
+            });
+
+            // ส่งข้อมูลฟอร์ม
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+
+                fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+                    .then(response => {
+                        if (!response.ok) throw new Error("เกิดข้อผิดพลาดในการส่งข้อมูล");
+                        alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
+                        window.location.href = ""; // กลับไปหน้าแรก
+                    })
+                    .catch(error => {
+                        showError("❌ ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+                        console.error('Error!', error.message);
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
