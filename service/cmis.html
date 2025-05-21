@@ -73,7 +73,11 @@
         let password = document.getElementById("password").value.trim();
 
         try {
-            let response = await fetch("/DATA/login.json");
+            let response = await fetch("./DATA/login.json");
+            if (!response.ok) {
+                throw new Error(`ไม่สามารถโหลด login.json ได้ (${response.status})`);
+            }
+            
             let users = await response.json();
             let user = users.find(user => user.username === username);
 
