@@ -47,150 +47,179 @@
                     <form id="loginForm" method="post" autocomplete="off">
                         <label for="username">รหัสนักเรียน:</label>
                         <input type="text" id="username" name="username" required placeholder="กรอกรหัสนักเรียน">
-            
+        
                         <label for="password">รหัสผ่าน:</label>
                         <input type="password" id="password" name="password" required placeholder="วันเดือนปีเกิด (ddmmyyyy)">
-                        <small>(วันเดือนปีเกิด ให้กรอกติดกัน เช่น 17052530)</small>
-            
-                        <button type="submit" style="margin-top: 15px;">เข้าสู่ระบบ</button>
-                        <div id="errorMessage" style="display: none; color: red; margin-top: 10px;"></div>
+                        <small>(วันเดือนปีเกิด ให้กรอกติดกันเช่น เกิดวันที่ 17/05/2530 ให้กรอกเป็น 17052530)</small>
+        
+                        <button type="submit" style=" margin-top: 15px; ">เข้าสู่ระบบ</button>
+                        <div id="errorMessage" style="display: block;color: red;margin-top: 10px;"></div>
                     </form>
                 </div>
-            
-                <div id="mainContent" style="display: none;">
-                    <div id="userDetail" style="margin: 5px 0;"></div>
-                    <button onclick="logout()" style="position: absolute; top: 20px; right: 20px; width: 100px; font-size: 12px;">ออกจากระบบ</button>
+                
+                <div id="mainContent">
+                    <div id="userDetail" style=" margin: 5px 0; "></div>
+                    <button onclick="logout()" style=" position: absolute; top: 20px; right: 20px; width: 100px; font-size: 12px; ">ออกจากระบบ</button>
                     <div id="welcomeMessage"></div>
                 </div>
             </main>
         </div>
     </div>
     <script>
-    document.getElementById("loginForm").addEventListener("submit", async function(event) {
-        event.preventDefault();
-
-        let username = document.getElementById("username").value.trim();
-        let password = document.getElementById("password").value.trim();
-
-        try {
-            let response = await fetch("./DATA/login.json");
-            if (!response.ok) {
-                throw new Error(`ไม่สามารถโหลด login.json ได้ (${response.status})`);
-            }
+        document.getElementById("loginForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
             
-            let users = await response.json();
-            let user = users.find(user => user.username === username);
-
-            if (!user) {
-                showError("❌ ไม่พบรหัสนักเรียนนี้");
-                return;
-            }
-
-            if (user.password === "Banned" || username === "45405") {
-                showError("⛔ บัญชีนี้ถูกระงับการใช้งาน<br>หากมีข้อสงสัยให้สอบถามหัวหน้าสำนักงานสภา");
-                return;
-            }
-
-            if (user.password === password) {
-                let infoResponse = await fetch("/DATA/m-information.json");
-                let infoUsers = await infoResponse.json();
-                let userInfo = infoUsers.find(info => info.username === username);
-
-                if (userInfo) {
-                    localStorage.setItem("loggedInUser", JSON.stringify(userInfo));
-                    displayUserInfo(userInfo);
-                } else {
-                    showError("❌ ไม่พบข้อมูลสมาชิก");
+            let username = document.getElementById("username").value.trim();
+            let password = document.getElementById("password").value.trim();
+            
+            try {
+                // ดึงข้อมูลจาก login.json
+                let response = await fetch("/DATA/login.json");
+                let users = await response.json();
+                let user = users.find(user => user.username === username);
+        
+                if (!user) {
+                    showError("❌ ไม่พบรหัสนักเรียนนี้");
+                    return;
                 }
-            } else {
-                showError("❌ รหัสผ่านไม่ถูกต้อง");
+        
+                if (user.password === "Banned") {
+                    showError("⛔ บัญชีนี้ถูกระงับการใช้งาน<br>หากมีข้อสงสัยให้สอบถามหัวหน้าสำนักงานสภา");
+                    return;
+                }
+        
+                if (user.password === password) {
+                    // ดึงข้อมูลจาก m-information.json
+                    let infoResponse = await fetch("/DATA/m-information.json");
+                    let infoUsers = await infoResponse.json();
+                    let userInfo = infoUsers.find(info => info.username === username);
+        
+                    if (userInfo) {
+                        localStorage.setItem("loggedInUser", JSON.stringify(userInfo)); // บันทึกข้อมูล
+                        displayUserInfo(userInfo);
+                    } else {
+                        showError("❌ ไม่พบข้อมูลสมาชิก");
+                    }
+                } else {
+                    showError("❌ รหัสผ่านไม่ถูกต้อง");
+                }
+            } catch (error) {
+                console.error("เกิดข้อผิดพลาด:", error);
+                alert("ไม่สามารถโหลดข้อมูลเข้าสู่ระบบได้!");
             }
-        } catch (error) {
-            console.error("เกิดข้อผิดพลาด:", error);
-            alert("ไม่สามารถโหลดข้อมูลเข้าสู่ระบบได้!");
-        }
-    });
-
-    function displayUserInfo(userInfo) {
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
-
-        const userDetailContainer = document.getElementById("userDetail");
-        userDetailContainer.innerHTML = `
-            <h4>แก้ไขข้อมูลสมาชิก</h4>
-            <form method="post" autocomplete="off" name="hello-sheet">
-                <input type="hidden" name="username" value="${userInfo.username}">
-                <div style="display: flex;gap: 10px;">
-                    <div style="display: grid; text-align: left; width: 33.333%;">
-                        <label>คำนำหน้า:</label>
-                        <input type="text" name="prefix" value="${userInfo.prefix}">
-                    </div>
-                    <div style="display: grid; text-align: left; width: 33.333%;">
-                        <label>ชื่อ:</label>
-                        <input type="text" name="fname" value="${userInfo.fname}">
-                    </div>
-                    <div style="display: grid; text-align: left; width: 33.333%;">
-                        <label>นามสกุล:</label>
-                        <input type="text" name="lname" value="${userInfo.lname}">
-                    </div>
-                </div>
-                <div style="display: grid; text-align: left;">
-                    <label>ปริญญาตรี:</label>
-                    <input type="text" name="degree" value="${userInfo["ปริญญาตรี"]}">
-                </div>
-                <div style="display: grid; text-align: left;">
-                    <label>ปริญญาโท:</label>
-                    <input type="text" name="master" value="${userInfo["ปริญญาโท"]}">
-                </div>
-                <div style="display: grid; text-align: left;">
-                    <label>ปริญญาเอก:</label>
-                    <input type="text" name="doctor" value="${userInfo["ปริญญาเอก"]}">
-                </div>
-                <div style="display: grid; text-align: left;">
-                    <label>สถานะ:</label>
-                    <input type="text" name="status" value="${userInfo["สถานะ"]}">
-                </div>
-                <button type="submit">บันทึกการเปลี่ยนแปลง</button>
-            </form>
-        `;
-
-        attachFormSubmit();
-    }
-
-    function attachFormSubmit() {
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwVAlw1rez8mLtkCRk0ljxsHzX1zb9oYqpuyf-PkOwI_T65m9DSo2wEeCXqDXPA0t7D/exec';
-        const form = document.forms['hello-sheet'];
-
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-
-            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-                .then(response => {
-                    alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
-                    window.location.href = "";
-                })
-                .catch(error => console.error('Error!', error.message));
         });
-    }
-
-    function showError(message) {
-        const errorMessage = document.getElementById("errorMessage");
-        errorMessage.innerHTML = message;
-        errorMessage.style.display = "block";
-    }
-
-
-    window.onload = function() {
-        let savedUser = localStorage.getItem("loggedInUser");
-        if (savedUser) {
-            displayUserInfo(JSON.parse(savedUser));
+        
+        // แสดงข้อมูลสมาชิก
+        function displayUserInfo(userInfo) {
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("mainContent").style.display = "block";
+        
+            const userDetailContainer = document.getElementById("userDetail");
+            userDetailContainer.innerHTML = `
+                <h4>แก้ไขข้อมูลสมาชิก</h4>
+                <form method="post" autocomplete="off" name="hello-sheet">
+                    <input type="hidden" name="username" value="${userInfo.username}">
+                    <div style="display: flex;gap: 10px;">
+                        <div style=" display: grid; text-align: left;width: 33.333%; ">
+                            <label>คำนำหน้า:</label>
+                            <input type="text" name="prefix" value="${userInfo.prefix}">
+                        </div>
+                        <div style=" display: grid; text-align: left;width: 33.333%; ">
+                            <label>ชื่อ:</label>
+                            <input type="text" name="fname" value="${userInfo.fname}">
+                        </div>
+                        <div style=" display: grid; text-align: left;width: 33.333%; ">
+                            <label>นามสกุล:</label>
+                            <input type="text" name="lname" value="${userInfo.lname}">
+                        </div>
+                    </div>
+                        <div style=" display: grid; text-align: left; ">
+                            <label>ปริญญาตรี:</label>
+                            <input type="text" name="degree" style=" font-size: 14px; " value="${userInfo["ปริญญาตรี"]}">
+                        </div>
+                        <div style=" display: grid; text-align: left; ">
+                            <label>ปริญญาโท:</label>
+                            <input type="text" name="master" style=" font-size: 14px; " value="${userInfo["ปริญญาโท"]}">
+                        </div>
+                        <div style=" display: grid; text-align: left; ">
+                            <label>ปริญญาเอก:</label>
+                            <input type="text" name="doctor" style=" font-size: 14px; " value="${userInfo["ปริญญาเอก"]}">
+                        </div>
+                        <div style=" display: grid; text-align: left; ">
+                            <label>สถานะ:</label>
+                            <input type="text" name="status" value="${userInfo["สถานะ"]}">
+                        </div>
+                        
+                    <button type="submit">บันทึกการเปลี่ยนแปลง</button>
+                </form>
+            `;
+        
+            attachFormSubmit(); // ผูกฟังก์ชันส่งฟอร์ม
         }
-    };
+        
+        // ฟังก์ชันบันทึกข้อมูลไป Google Sheet
+        function attachFormSubmit() {
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbwVAlw1rez8mLtkCRk0ljxsHzX1zb9oYqpuyf-PkOwI_T65m9DSo2wEeCXqDXPA0t7D/exec';
+            const form = document.forms['hello-sheet'];
+        
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+        
+                fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                    .then(response => {
+                        alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
+                        window.location.href = ""; // กลับไปหน้าแรก
+                    })
+                    .catch(error => console.error('Error!', error.message));
+            });
+        }
+        
+        // แสดงข้อความผิดพลาด
+        function showError(message) {
+            let errorMessage = document.getElementById("errorMessage");
+            errorMessage.innerHTML = message;
+            errorMessage.style.display = "block";
+        }
+        
+        // เช็คว่ามีคนล็อกอินอยู่ไหม
+        window.onload = function() {
+            let savedUser = localStorage.getItem("loggedInUser");
+            if (savedUser) {
+                displayUserInfo(JSON.parse(savedUser));
+            }
+        };
+        
+        // ฟังก์ชันออกจากระบบ
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            window.location.reload();
+        }
 
-    function logout() {
-        localStorage.removeItem("loggedInUser");
-        window.location.reload();
-    }
-</script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const usernameInput = document.getElementById("username");
+        
+            usernameInput.addEventListener("input", function () {
+                if (usernameInput.value === "45405") {
+                    showError("⛔ บัญชีนี้ถูกระงับการใช้งาน<br>หากมีข้อสงสัยให้สอบถามหัวหน้าสำนักงานสภา");
+                    return;
+                }
+            });
+        
+            function showError(message) {
+                const errorContainer = document.getElementById("error-message");
+                if (!errorContainer) {
+                    const newErrorContainer = document.createElement("div");
+                    newErrorContainer.id = "error-message";
+                    newErrorContainer.innerHTML = message;
+                    newErrorContainer.style.color = "red";
+                    newErrorContainer.style.marginTop = "10px";
+                    usernameInput.parentNode.appendChild(newErrorContainer);
+                } else {
+                    errorContainer.innerHTML = message;
+                }
+            }
+        });
+
+    </script>
 </body>
 </html>
