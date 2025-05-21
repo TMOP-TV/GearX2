@@ -47,19 +47,19 @@
                     <form id="loginForm" method="post" autocomplete="off">
                         <label for="username">รหัสนักเรียน:</label>
                         <input type="text" id="username" name="username" required placeholder="กรอกรหัสนักเรียน">
-        
+            
                         <label for="password">รหัสผ่าน:</label>
                         <input type="password" id="password" name="password" required placeholder="วันเดือนปีเกิด (ddmmyyyy)">
-                        <small>(วันเดือนปีเกิด ให้กรอกติดกันเช่น เกิดวันที่ 17/05/2530 ให้กรอกเป็น 17052530)</small>
-        
-                        <button type="submit" style=" margin-top: 15px; ">เข้าสู่ระบบ</button>
-                        <div id="errorMessage" style="display: block;color: red;margin-top: 10px;"></div>
+                        <small>(วันเดือนปีเกิด ให้กรอกติดกัน เช่น 17052530)</small>
+            
+                        <button type="submit" style="margin-top: 15px;">เข้าสู่ระบบ</button>
+                        <div id="errorMessage" style="display: none; color: red; margin-top: 10px;"></div>
                     </form>
                 </div>
-                
-                <div id="mainContent">
-                    <div id="userDetail" style=" margin: 5px 0; "></div>
-                    <button onclick="logout()" style=" position: absolute; top: 20px; right: 20px; width: 100px; font-size: 12px; ">ออกจากระบบ</button>
+            
+                <div id="mainContent" style="display: none;">
+                    <div id="userDetail" style="margin: 5px 0;"></div>
+                    <button onclick="logout()" style="position: absolute; top: 20px; right: 20px; width: 100px; font-size: 12px;">ออกจากระบบ</button>
                     <div id="welcomeMessage"></div>
                 </div>
             </main>
@@ -174,6 +174,7 @@
         errorMessage.innerHTML = message;
         errorMessage.style.display = "block";
     }
+
 
     window.onload = function() {
         let savedUser = localStorage.getItem("loggedInUser");
